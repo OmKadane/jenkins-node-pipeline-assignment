@@ -1,0 +1,43 @@
+// Jenkinsfile.declarative
+
+pipeline {
+    // Use a Docker container with Node.js pre-installed.
+    agent {
+        docker { image 'node:18-alpine' }
+    }
+
+    stages {
+        // Stage 1: Install dependencies. No need for a separate checkout stage
+        // as Jenkins checks out the code automatically when using an agent.
+        stage('Install Dependencies') {
+            steps {
+                echo 'Running npm install...'
+                sh 'npm install'
+            }
+        }
+
+        // Stage 2: Run the tests.
+        stage('Test') {
+            steps {
+                echo 'Running npm test...'
+                sh 'npm test'
+            }
+        }
+    }
+
+    // Post-build actions: This block runs after all stages are complete.
+    post {
+        // 'always' runs regardless of the pipeline's status.
+        always {
+            echo 'Pipeline finished.'
+        }
+        // 'success' runs only if the pipeline is successful.
+        success {
+            echo 'Success! The build passed.'
+        }
+        // 'failure' runs only if the pipeline fails.
+        failure {
+            echo 'Failure. The build failed.'
+        }
+    }
+}
