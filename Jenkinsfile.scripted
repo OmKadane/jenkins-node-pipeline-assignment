@@ -1,0 +1,40 @@
+// Jenkinsfile.scripted
+
+// Define a node to run the pipeline on.
+node {
+    // Define and use a Docker container for the Node.js environment.
+    docker.image('node:18-alpine').inside {
+        try {
+            // Stage 1: Checkout code from version control.
+            stage('Checkout') {
+                checkout scm
+            }
+
+            // Stage 2: Install dependencies.
+            stage('Install Dependencies') {
+                echo 'Running npm install...'
+                sh 'npm install'
+            }
+
+            // Stage 3: Run the tests.
+            stage('Test') {
+                echo 'Running npm test...'
+                sh 'npm test'
+            }
+
+            // If all steps above succeed, print the success message.
+            echo 'Success! The build passed.'
+
+        } catch (err) {
+            // If any step in the 'try' block fails, this block runs.
+            echo "Failure. The build failed with error: ${err}"
+            // Manually set the build status to FAILURE.
+            currentBuild.result = 'FAILURE'
+            // Re-throw the error to ensure the pipeline stops.
+            throw err
+        } finally {
+            // This block runs regardless of success or failure.
+            echo 'Pipeline finished.'
+        }
+    }
+}
